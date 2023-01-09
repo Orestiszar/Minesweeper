@@ -9,6 +9,16 @@ public class Minefield {
     private int difficulty,grid_size,mine_count,seconds,supermine;
     private Tile[][] minefield;
 
+    public int[] getSettings(){
+        int[] result = new int[5];
+        result[0] = difficulty;
+        result[1] = grid_size;
+        result[2] = mine_count;
+        result[3] = seconds;
+        result[4] = supermine;
+        return result;
+    }
+
     private int[] ReadSettings(String path) throws InvalidDescriptionException {//return data from setting file in an int array
         BufferedReader br = null;
         String line;
