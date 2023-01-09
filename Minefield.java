@@ -1,11 +1,85 @@
+import myExceptions.InvalidDescriptionException;
+import myExceptions.InvalidValueException;
+
+import java.io.*;
+
 import static java.lang.Integer.parseInt;
 
 public class Minefield {
-    private int grid_size,difficulty;
-
+    private int difficulty,grid_size,mine_count,seconds,supermine;
     private Tile[][] minefield;
 
-    public void setMinefield(int mine_count){
+    private int[] ReadSettings(String path) throws InvalidDescriptionException {//return data from setting file in an int array
+        BufferedReader br = null;
+        String line;
+        int data[] = new int[4];
+        int i = 0;
+        try {
+            /* Create BufferedReader to read file */
+            br = new BufferedReader(new FileReader(path));
+            while((line = br.readLine()) != null) { //read next line until eof
+                if(line.length() == 0) //Skip empty lines
+                    continue;
+                data[i] = parseInt(line);
+                i++;
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {if (br != null) {br.close();}
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(i<4){
+            throw new InvalidDescriptionException("Description file invalid");
+        }
+        return data;
+    }
+
+    private void setParameters(int[] settings) throws InvalidValueException {
+        difficulty = settings[0];
+        mine_count = settings[1];
+        seconds = settings[2];
+        supermine = settings[3];
+
+        if(difficulty<1 || difficulty>2){
+            throw new InvalidValueException("Difficulty should be an integer of value 1 or 2.");
+        }
+
+        if(difficulty == 1 && (mine_count<9 || mine_count > 11)){
+            throw new InvalidValueException("Invalid mine count for selected difficulty. Bounds are 9-11.");
+        }
+
+        if(difficulty == 2 && (mine_count<35 || mine_count > 45)){
+            throw new InvalidValueException("Invalid mine count for selected difficulty. Bounds are 35-45.");
+        }
+
+        if(difficulty == 1 && (seconds<120 || seconds > 180)){
+            throw new InvalidValueException("Invalid time limits for selected difficulty. Bounds are 120-180.");
+        }
+
+        if(difficulty == 2 && (seconds<240 || seconds > 360)){
+            throw new InvalidValueException("Invalid time limits for selected difficulty. Bounds are 240-360.");
+        }
+
+        if(supermine<0 || supermine>1){
+            throw new InvalidValueException("Supermine value should be 0 or 1");
+        }
+
+        if(difficulty == 1 && supermine==1){
+            throw new InvalidValueException("Supermines are only available in difficulty 2.");
+        }
+        //set grid_size
+        if (difficulty==1) grid_size = 9;
+        else grid_size = 16;
+    }
+
+    public void setMinefield(){
         int x,y;
         int[] minex = new int[mine_count];//collect the mines to decide a supermine
         int[] miney = new int[mine_count];
@@ -32,25 +106,24 @@ public class Minefield {
     }
 
     private void saveMinefield(){
-//        BufferedWriter bwr = null;
-//        try {
-//            bwr = new BufferedWriter(new FileWriter("./mines.txt"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        finally {
-//            try {if (bwr != null) {bwr.close();}
-//            }
-//            catch (IOException e) {
-//            }
-//        }
-
-        for(int i=0;i<grid_size;i++){
-            for(int j=0;j<grid_size;j++){
-                if(minefield[i][j].mine==1){
-                    String towrite = i+","+j+","+minefield[i][j].supermine+"\n";
-                    System.out.print(towrite);
+        BufferedWriter bwr = null;
+        try {
+            bwr = new BufferedWriter(new FileWriter("./mines.txt"));
+            for(int i=0;i<grid_size;i++){
+                for(int j=0;j<grid_size;j++){
+                    if(minefield[i][j].mine==1){
+                        String towrite = i+","+j+","+minefield[i][j].supermine+"\n";
+                        bwr.write(towrite);
+                    }
                 }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {if (bwr != null) {bwr.close();}
+            }
+            catch (IOException e) {
             }
         }
     }
@@ -63,9 +136,19 @@ public class Minefield {
             System.out.println();
         }
     }
-    public Minefield(int grid_size, int difficulty){
-        this.difficulty = difficulty;
-        this.grid_size = grid_size;
+    public Minefield(String path){
+        try{
+            int[] settings;
+            settings = ReadSettings(path); //throws InvalidDescriptionException
+            setParameters(settings); //throws InvalidValueException
+        }
+        catch (InvalidDescriptionException e){
+            e.printStackTrace();
+        }
+        catch(InvalidValueException e){
+            e.printStackTrace();
+        }
+
         minefield = new Tile[grid_size][grid_size];
         for(int i=0;i<grid_size;i++){
             for(int j=0;j<grid_size;j++){
