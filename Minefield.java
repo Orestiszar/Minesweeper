@@ -3,6 +3,7 @@ import myExceptions.InvalidValueException;
 
 import java.io.*;
 
+import static java.lang.Integer.min;
 import static java.lang.Integer.parseInt;
 
 public class Minefield {
@@ -146,6 +147,16 @@ public class Minefield {
             System.out.println();
         }
     }
+
+    public boolean gameWon(){
+        for(int i=0;i<grid_size;i++){
+            for(int j=0;j<grid_size;j++){
+                if(minefield[i][j].opened==false && minefield[i][j].mine==0) return false;
+            }
+        }
+        return true;
+    }
+
     public Minefield(String path){
         try{
             int[] settings;

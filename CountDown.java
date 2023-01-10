@@ -6,11 +6,11 @@ public class CountDown implements Runnable{
         try{
             while (true){
                 System.out.println("Thread Started Running..."+seconds);
-                seconds--;
                 if(seconds==0){
                     return;
                 }
                 t.sleep(1000);
+                seconds--;
             }
         }
         catch (InterruptedException e){
