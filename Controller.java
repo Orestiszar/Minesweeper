@@ -35,6 +35,65 @@ public class Controller {
         return img;
     }
 
+    private void myclickhandler(MouseEvent event){
+        Button button = (Button)event.getSource();
+        MouseButton pressedButton = event.getButton();
+        //getbuttonid
+        String id = button.getId();
+        int i=0;
+        while(id.charAt(i) != ' '){
+            i++;
+        }
+        String myrow = id.substring(0,i);
+        String mycol = id.substring(i+1);
+        int brow = Integer.parseInt(myrow);
+        int bcol = Integer.parseInt(mycol);
+        if(pressedButton==MouseButton.PRIMARY){
+            System.out.println(id);
+            button.setDisable(true);
+            button.setOpacity(1);
+
+            MineSweeper.minefield.setTileOpened(brow,bcol);
+            if(MineSweeper.minefield.getTile(brow,bcol).mine==0){
+                //call recursive check
+                int mines = MineSweeper.minefield.getNumOfMines(brow,bcol);
+                ImageView img = new ImageView();
+                switch(mines){
+                    case 0: img = getImage("graphics/Uncovered_Tile.png"); break;
+                    case 1: img = getImage("graphics/1.png"); break;
+                    case 2: img = getImage("graphics/2.png"); break;
+                    case 3: img = getImage("graphics/3.png"); break;
+                    case 4: img = getImage("graphics/4.png"); break;
+                    case 5: img = getImage("graphics/5.png"); break;
+                    case 6: img = getImage("graphics/6.png"); break;
+                    case 7: img = getImage("graphics/7.png"); break;
+                    case 8: img = getImage("graphics/8.png"); break;
+                }
+                button.setGraphic(img);
+                button.setPadding(Insets.EMPTY);
+            }
+            else{
+                //gameover
+                ImageView img = getImage("graphics/Mine.png");
+                button.setGraphic(img);
+                button.setPadding(Insets.EMPTY);
+            }
+        }
+        else if(pressedButton==MouseButton.SECONDARY){
+            ImageView img;
+            if(MineSweeper.minefield.getTile(brow,bcol).flagged){
+                img = getImage("graphics/Covered_Tile.png");
+                MineSweeper.minefield.setTileFlag(brow,bcol,false);
+            }
+            else{
+                img = getImage("graphics/Flag.png");
+                MineSweeper.minefield.setTileFlag(brow,bcol,true);
+            }
+            button.setGraphic(img);
+            button.setPadding(Insets.EMPTY);
+        }
+    }
+
     public void switchToGame(ActionEvent event) throws IOException {
         BorderPane border = new BorderPane();
         GridPane grid = new GridPane();
@@ -43,62 +102,13 @@ public class Controller {
             for (int c = 0; c < grid_size; c++) {
                 int number = grid_size * r + c;
                 Button button = new Button();
-                button.setId(Integer.toString(r) + " " +Integer.toString(c));
+                button.setId(r + " " +c);
                 button.setPrefSize(50,50);
 
                 ImageView img = getImage("graphics/Covered_Tile.png");
                 button.setGraphic(img);
                 button.setPadding(Insets.EMPTY);
-
-                button.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        MouseButton pressedButton = event.getButton();
-                        if(pressedButton==MouseButton.PRIMARY){
-//                            button.setText("PRIMARY button clicked on button");
-                            String id = button.getId();
-                            int i=0;
-                            while(id.charAt(i) != ' '){
-                                i++;
-                            }
-                            String myrow = id.substring(0,i);
-                            String mycol = id.substring(i+1);
-                            int brow = Integer.parseInt(myrow);
-                            int bcol = Integer.parseInt(mycol);
-                            System.out.println(id);
-                            button.setDisable(true);
-                            button.setOpacity(1);
-
-                            MineSweeper.minefield.setTileOpened(brow,bcol);
-                            if(MineSweeper.minefield.getTile(brow,bcol).mine==0){
-                                //call recursive check
-                                ImageView img = getImage("graphics/Uncovered_Tile.png");
-                                button.setGraphic(img);
-                                button.setPadding(Insets.EMPTY);
-                            }
-                            else{
-                                //gameover
-                                ImageView img = getImage("graphics/Mine.png");
-                                button.setGraphic(img);
-                                button.setPadding(Insets.EMPTY);
-                            }
-
-//                            Image imageOk = new Image(getClass().getResourceAsStream("graphics/Uncovered_Tile.png"));
-//                            ImageView img = new ImageView(imageOk);
-//                            img.setFitHeight(50);
-//                            img.setPreserveRatio(true);
-//                            button.setGraphic(img);
-//                            button.setPadding(Insets.EMPTY);
-//                            button.setDisable(true);
-//                            button.setOpacity(1);
-
-                        }
-                        else if(pressedButton==MouseButton.SECONDARY){
-                            button.setText("SECONDARY button clicked on button");
-                        }
-                    }
-                });
-
+                button.setOnMouseClicked(this::myclickhandler);
                 grid.add(button, c, r);
             }
         }

@@ -19,6 +19,10 @@ public class Minefield {
         minefield[row][col].opened=true;
     }
 
+    public void setTileFlag(int row, int col, boolean state){
+        minefield[row][col].flagged=state;
+    }
+
     public int getNumOfMines(int row, int col){
         int total = 0;
         for(int i=-1;i<2;i++){
@@ -178,7 +182,7 @@ public class Minefield {
     public boolean gameWon(){
         for(int i=0;i<grid_size;i++){
             for(int j=0;j<grid_size;j++){
-                if(minefield[i][j].opened==false && minefield[i][j].mine==0) return false;
+                if(!minefield[i][j].opened && minefield[i][j].mine==0) return false;
             }
         }
         return true;
