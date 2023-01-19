@@ -1,3 +1,4 @@
+import javafx.event.ActionEvent;
 import myExceptions.InvalidDescriptionException;
 import myExceptions.InvalidValueException;
 
@@ -9,6 +10,32 @@ import static java.lang.Integer.parseInt;
 public class Minefield {
     private int difficulty,grid_size,mine_count,seconds,supermine;
     private Tile[][] minefield;
+
+    public Tile getTile(int row, int col){
+        return minefield[row][col];
+    }
+
+    public void setTileOpened(int row, int col){
+        minefield[row][col].opened=true;
+    }
+
+    public int getNumOfMines(int row, int col){
+        int total = 0;
+        for(int i=-1;i<2;i++){
+            if(row+i<0 || row+i>grid_size-1){
+                continue;
+            }
+            for(int j=-1;j<2;j++){
+                if(col+j<0 || col+j>grid_size-1){
+                    continue;
+                }
+                if(minefield[row+i][col+j].mine==1){
+                    total++;
+                }
+            }
+        }
+        return total;
+    }
 
     public int[] getSettings(){
         int[] result = new int[5];
@@ -178,4 +205,5 @@ public class Minefield {
             }
         }
     }
+
 }
