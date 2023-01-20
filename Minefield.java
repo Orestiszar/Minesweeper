@@ -1,10 +1,8 @@
-import javafx.event.ActionEvent;
 import myExceptions.InvalidDescriptionException;
 import myExceptions.InvalidValueException;
 
 import java.io.*;
 
-import static java.lang.Integer.min;
 import static java.lang.Integer.parseInt;
 
 public class Minefield {

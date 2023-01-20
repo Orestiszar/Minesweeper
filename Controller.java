@@ -1,5 +1,3 @@
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -15,14 +13,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import javafx.event.ActionEvent;
-
-
 import java.io.IOException;
-import java.io.StringReader;
 
 public class Controller {
     private Stage stage;
@@ -82,7 +76,7 @@ public class Controller {
                     if(col+j<0 || col+j>grid_size-1){
                         continue;
                     }
-                    if(MineSweeper.minefield.getTile(row+i,col+j).opened==false){
+                    if(!MineSweeper.minefield.getTile(row+i,col+j).opened){
                         revealEmptyCells(row+i,col+j);
                     }
                 }
@@ -164,13 +158,10 @@ public class Controller {
                 //gameover
                 timer_label.setText("You Lose :(");
                 setAndDisableAllButtons();
-//                ImageView img = getImage("graphics/Mine.png");
-//                button.setGraphic(img);
-//                button.setPadding(Insets.EMPTY);
             }
         }
         else if(pressedButton==MouseButton.SECONDARY){
-            ImageView img = null;
+            ImageView img;
             if(MineSweeper.minefield.getTile(brow,bcol).flagged){
                 img = getImage("graphics/Covered_Tile.png");
                 MineSweeper.minefield.setTileFlag(brow,bcol,false);
@@ -183,7 +174,7 @@ public class Controller {
         }
     }
 
-    public void switchToGame(ActionEvent event) throws IOException {
+    public void switchToGame(ActionEvent event){
         MineSweeper.initMinefield("./medialab/SCENARIO1.txt");//change path
         int grid_size = MineSweeper.minefield.getSettings()[1];
         grid_buttons = new Button[grid_size][grid_size];
