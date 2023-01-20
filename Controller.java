@@ -1,3 +1,4 @@
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -5,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -25,7 +27,11 @@ import java.io.StringReader;
 public class Controller {
     private Stage stage;
     private Scene scene;
-    private static Parent root;
+    private Parent root;
+    public static Button[][] grid_buttons = null;
+    public static Label timer_label = null;
+
+    private int tries=0;
 
     private ImageView getImage(String path){
         Image imageOk = new Image(getClass().getResourceAsStream(path));
@@ -33,6 +39,99 @@ public class Controller {
         img.setFitHeight(50);
         img.setPreserveRatio(true);
         return img;
+    }
+
+    private void setCorrectImage(final int row, final int col){
+        ImageView img = null;
+        if(MineSweeper.minefield.getTile(row, col).mine==1){
+            img = getImage("graphics/Mine.png");
+        }
+        else{
+            int mines = MineSweeper.minefield.getNumOfMines(row,col);
+            switch(mines){
+                case 0: img = getImage("graphics/Uncovered_Tile.png"); break;
+                case 1: img = getImage("graphics/1.png"); break;
+                case 2: img = getImage("graphics/2.png"); break;
+                case 3: img = getImage("graphics/3.png"); break;
+                case 4: img = getImage("graphics/4.png"); break;
+                case 5: img = getImage("graphics/5.png"); break;
+                case 6: img = getImage("graphics/6.png"); break;
+                case 7: img = getImage("graphics/7.png"); break;
+                case 8: img = getImage("graphics/8.png"); break;
+                case 9: img = getImage("graphics/Mine.png"); break;
+            }
+        }
+        grid_buttons[row][col].setGraphic(img);
+        grid_buttons[row][col].setPadding(Insets.EMPTY);
+        grid_buttons[row][col].setDisable(true);
+        grid_buttons[row][col].setOpacity(1);
+    }
+
+    private void revealEmptyCells(final int row, final int col){
+        if(MineSweeper.minefield.getTile(row,col).mine==0){
+            int mines = MineSweeper.minefield.getNumOfMines(row,col);
+            setCorrectImage(row,col);
+            MineSweeper.minefield.setTileOpened(row,col);
+            if(mines>0) return;
+            int grid_size = MineSweeper.minefield.getSettings()[1];
+            for(int i=-1;i<2;i++){
+                if(row+i<0 || row+i>grid_size-1){
+                    continue;
+                }
+                for(int j=-1;j<2;j++){
+                    if(col+j<0 || col+j>grid_size-1){
+                        continue;
+                    }
+                    if(MineSweeper.minefield.getTile(row+i,col+j).opened==false){
+                        revealEmptyCells(row+i,col+j);
+                    }
+                }
+            }
+        }
+    }
+
+    private void performFlag(final int row, final int col){
+        int flagged_mines=0,grid_size,mine_count;
+        grid_size = MineSweeper.minefield.getSettings()[1];
+        mine_count = MineSweeper.minefield.getSettings()[2];
+        for(int k=0;k<grid_size;k++){
+            for(int m=0;m<grid_size;m++){
+                if(MineSweeper.minefield.getTile(k,m).flagged){
+                    flagged_mines+=1;
+                }
+            }
+        }
+        if(mine_count>flagged_mines){//num of mines = settings[2]
+            if(MineSweeper.minefield.getTile(row,col).supermine==1 && tries<4){
+                //reveal row&col
+                for(int i=0;i<grid_size;i++){
+                    setCorrectImage(i,col);
+                    if(MineSweeper.minefield.getTile(i,col).mine==0){
+                        MineSweeper.minefield.setTileOpened(i,col);
+                    }
+                    setCorrectImage(row,i);
+                    if(MineSweeper.minefield.getTile(row,i).mine==0){
+                        MineSweeper.minefield.setTileOpened(row,i);
+                    }
+                }
+
+            }
+            else{
+                ImageView img = getImage("graphics/Flag.png");
+                MineSweeper.minefield.setTileFlag(row,col,true);
+                grid_buttons[row][col].setGraphic(img);
+                grid_buttons[row][col].setPadding(Insets.EMPTY);
+            }
+        }
+    }
+
+    private void setAndDisableAllButtons(){
+        int grid_size = MineSweeper.minefield.getSettings()[1];
+        for(int i=0;i<grid_size;i++){
+            for(int j=0;j<grid_size;j++){
+                setCorrectImage(i,j);
+            }
+        }
     }
 
     private void myclickhandler(MouseEvent event){
@@ -50,57 +149,50 @@ public class Controller {
         int bcol = Integer.parseInt(mycol);
         if(pressedButton==MouseButton.PRIMARY){
             System.out.println(id);
-            button.setDisable(true);
-            button.setOpacity(1);
+            tries++;
 
-            MineSweeper.minefield.setTileOpened(brow,bcol);
             if(MineSweeper.minefield.getTile(brow,bcol).mine==0){
                 //call recursive check
-                int mines = MineSweeper.minefield.getNumOfMines(brow,bcol);
-                ImageView img = new ImageView();
-                switch(mines){
-                    case 0: img = getImage("graphics/Uncovered_Tile.png"); break;
-                    case 1: img = getImage("graphics/1.png"); break;
-                    case 2: img = getImage("graphics/2.png"); break;
-                    case 3: img = getImage("graphics/3.png"); break;
-                    case 4: img = getImage("graphics/4.png"); break;
-                    case 5: img = getImage("graphics/5.png"); break;
-                    case 6: img = getImage("graphics/6.png"); break;
-                    case 7: img = getImage("graphics/7.png"); break;
-                    case 8: img = getImage("graphics/8.png"); break;
+                revealEmptyCells(brow,bcol);
+                if(MineSweeper.minefield.gameWon()){
+                    //stop the thread
+                    timer_label.setText("You Win!!!");
+                    setAndDisableAllButtons();
                 }
-                button.setGraphic(img);
-                button.setPadding(Insets.EMPTY);
             }
             else{
                 //gameover
-                ImageView img = getImage("graphics/Mine.png");
-                button.setGraphic(img);
-                button.setPadding(Insets.EMPTY);
+                timer_label.setText("You Lose :(");
+                setAndDisableAllButtons();
+//                ImageView img = getImage("graphics/Mine.png");
+//                button.setGraphic(img);
+//                button.setPadding(Insets.EMPTY);
             }
         }
         else if(pressedButton==MouseButton.SECONDARY){
-            ImageView img;
+            ImageView img = null;
             if(MineSweeper.minefield.getTile(brow,bcol).flagged){
                 img = getImage("graphics/Covered_Tile.png");
                 MineSweeper.minefield.setTileFlag(brow,bcol,false);
+                button.setGraphic(img);
+                button.setPadding(Insets.EMPTY);
             }
             else{
-                img = getImage("graphics/Flag.png");
-                MineSweeper.minefield.setTileFlag(brow,bcol,true);
+                performFlag(brow,bcol);
             }
-            button.setGraphic(img);
-            button.setPadding(Insets.EMPTY);
         }
     }
 
     public void switchToGame(ActionEvent event) throws IOException {
+        MineSweeper.initMinefield("./medialab/SCENARIO1.txt");//change path
+        int grid_size = MineSweeper.minefield.getSettings()[1];
+        grid_buttons = new Button[grid_size][grid_size];
+        timer_label = new Label(Integer.toString(MineSweeper.minefield.getSettings()[3]));
         BorderPane border = new BorderPane();
         GridPane grid = new GridPane();
-        int grid_size = MineSweeper.minefield.getSettings()[1];
+
         for (int r = 0; r < grid_size; r++) {
             for (int c = 0; c < grid_size; c++) {
-                int number = grid_size * r + c;
                 Button button = new Button();
                 button.setId(r + " " +c);
                 button.setPrefSize(50,50);
@@ -110,6 +202,7 @@ public class Controller {
                 button.setPadding(Insets.EMPTY);
                 button.setOnMouseClicked(this::myclickhandler);
                 grid.add(button, c, r);
+                grid_buttons[r][c] = button;
             }
         }
         ScrollPane scrollPane = new ScrollPane(grid);
@@ -119,15 +212,10 @@ public class Controller {
         Button show_minefield_button = new Button("Show Minefield");
 
         MainMenu_Button.setOnAction(this::switchToMainMenu);
-        show_minefield_button.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                MineSweeper.minefield.showMinefield();
-            }
-        });
+        show_minefield_button.setOnAction(actionEvent -> MineSweeper.minefield.showMinefield());
 
         FlowPane top_buttons = new FlowPane();
-        top_buttons.getChildren().addAll( MainMenu_Button , show_minefield_button) ;
+        top_buttons.getChildren().addAll(MainMenu_Button , show_minefield_button, timer_label) ;
         border.setTop(top_buttons);
         stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(border));
