@@ -1,15 +1,17 @@
 public class CountDown implements Runnable{
-    public Thread t;
+    public static Thread mythread;
     public int seconds;
     public void run()
     {
         try{
+            System.out.println("Thread Started Running..."+seconds);
             while (true){
-                System.out.println("Thread Started Running..."+seconds);
                 if(seconds==0){
+                    Controller.timer_label.setText("You Lose :(");
                     return;
                 }
-                t.sleep(1000);
+                mythread.sleep(1000);
+                Controller.timer_label.setText(Integer.toString(seconds));
                 seconds--;
             }
         }
@@ -20,7 +22,5 @@ public class CountDown implements Runnable{
     }
     public CountDown(int seconds){
         this.seconds=seconds;
-        t = new Thread(this,"Countdown");
-        t.start();
     }
 }

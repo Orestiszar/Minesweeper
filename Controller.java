@@ -175,10 +175,16 @@ public class Controller {
     }
 
     public void switchToGame(ActionEvent event){
-        MineSweeper.initMinefield("./medialab/SCENARIO1.txt");//change path
+        MineSweeper.initMinefield("./medialab/SCENARIO2.txt");//change path
         int grid_size = MineSweeper.minefield.getSettings()[1];
+        int time = MineSweeper.minefield.getSettings()[3];
+
+        CountDown timer = new CountDown(time);
+        CountDown.mythread = new Thread(timer,"Timer");
+
         grid_buttons = new Button[grid_size][grid_size];
-        timer_label = new Label(Integer.toString(MineSweeper.minefield.getSettings()[3]));
+        timer_label = new Label(Integer.toString(time));
+
         BorderPane border = new BorderPane();
         GridPane grid = new GridPane();
 
@@ -211,6 +217,8 @@ public class Controller {
         stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(border));
         stage.show();
+
+        CountDown.mythread.start();
     }
 
     public void switchToMainMenu(ActionEvent event){
