@@ -13,6 +13,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import javafx.event.ActionEvent;
@@ -128,6 +131,23 @@ public class Controller {
         }
     }
 
+    public void gameOver(boolean won){
+        //stop the thread
+
+        if(CountDown.mythread.isAlive()){
+            CountDown.mythread.interrupt();
+        }
+        String text;
+        if(won){
+            text = "You Win :)";
+        }
+        else{
+            text = "You Lose";
+        }
+        timer_label.setText(text);
+        setAndDisableAllButtons();
+    }
+
     private void myclickhandler(MouseEvent event){
         Button button = (Button)event.getSource();
         MouseButton pressedButton = event.getButton();
@@ -149,15 +169,12 @@ public class Controller {
                 //call recursive check
                 revealEmptyCells(brow,bcol);
                 if(MineSweeper.minefield.gameWon()){
-                    //stop the thread
-                    timer_label.setText("You Win!!!");
-                    setAndDisableAllButtons();
+                    gameOver(true);
+
                 }
             }
             else{
-                //gameover
-                timer_label.setText("You Lose :(");
-                setAndDisableAllButtons();
+                gameOver(false);
             }
         }
         else if(pressedButton==MouseButton.SECONDARY){
@@ -179,11 +196,14 @@ public class Controller {
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int time = MineSweeper.minefield.getSettings()[3];
 
-        CountDown timer = new CountDown(time);
-        CountDown.mythread = new Thread(timer,"Timer");
+        CountDown timer = new CountDown(time, this);
+        timer.mythread = new Thread(timer,"Timer");
+        timer.mythread.setDaemon(true);
 
         grid_buttons = new Button[grid_size][grid_size];
         timer_label = new Label(Integer.toString(time));
+
+        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 35));
 
         BorderPane border = new BorderPane();
         GridPane grid = new GridPane();
@@ -218,7 +238,7 @@ public class Controller {
         stage.setScene(new Scene(border));
         stage.show();
 
-        CountDown.mythread.start();
+        timer.mythread.start();
     }
 
     public void switchToMainMenu(ActionEvent event){
