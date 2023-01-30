@@ -7,7 +7,7 @@ public class CountDown implements Runnable{
     public void run()
     {
         try{
-            System.out.println("Thread Started Running...");
+//            System.out.println("Thread Started Running...");
             while (!Thread.interrupted()){
                 if(seconds==0){
                     Platform.runLater(new Runnable() {
@@ -17,7 +17,7 @@ public class CountDown implements Runnable{
                             controller.gameOver(false);
                         }
                     });
-                    System.out.println("Thread Stopped Running...");
+//                    System.out.println("Thread Stopped Running...");
                     return;
                 }
                 mythread.sleep(1000);
@@ -32,7 +32,7 @@ public class CountDown implements Runnable{
             }
         }
         catch (InterruptedException e){
-            System.out.println("Thread Stopped Running...");
+//            System.out.println("Thread Stopped Running...");
         }
 
     }

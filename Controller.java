@@ -1,3 +1,4 @@
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -13,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -20,13 +22,30 @@ import javafx.stage.Stage;
 
 import javafx.event.ActionEvent;
 import java.io.IOException;
+import java.util.concurrent.Flow;
+import java.util.stream.Stream;
 
 public class Controller {
     private Stage stage;
     private Scene scene;
     private Parent root;
-    public static Button[][] grid_buttons = null;
-    public static Label timer_label = null;
+    public Button[][] grid_buttons;
+
+    public String scenario_path = "./medialab/SCENARIO1.txt";
+    @FXML
+    public FlowPane flowpane;
+    @FXML
+    public GridPane grid;
+    @FXML
+    public Label timer_label;
+    @FXML
+    public Label mine_label;
+    @FXML
+    public Label flag_label;
+    @FXML
+    public ImageView flag_image_top;
+    @FXML
+    public VBox myvbox;
 
     private int tries=0;
 
@@ -118,6 +137,7 @@ public class Controller {
                 MineSweeper.minefield.setTileFlag(row,col,true);
                 grid_buttons[row][col].setGraphic(img);
                 grid_buttons[row][col].setPadding(Insets.EMPTY);
+                flag_label.setText(Integer.toString(flagged_mines+1));
             }
         }
     }
@@ -142,8 +162,9 @@ public class Controller {
             text = "You Win :)";
         }
         else{
-            text = "You Lose";
+            text = "You Lose :(";
         }
+//        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 25));
         timer_label.setText(text);
         setAndDisableAllButtons();
     }
@@ -162,7 +183,7 @@ public class Controller {
         int brow = Integer.parseInt(myrow);
         int bcol = Integer.parseInt(mycol);
         if(pressedButton==MouseButton.PRIMARY){
-            System.out.println(id);
+//            System.out.println(id);
             tries++;
 
             if(MineSweeper.minefield.getTile(brow,bcol).mine==0){
@@ -184,6 +205,8 @@ public class Controller {
                 MineSweeper.minefield.setTileFlag(brow,bcol,false);
                 button.setGraphic(img);
                 button.setPadding(Insets.EMPTY);
+                int temp_flag_count = Integer.parseInt(flag_label.getText());
+                flag_label.setText(Integer.toString(temp_flag_count-1));
             }
             else{
                 performFlag(brow,bcol);
@@ -192,21 +215,32 @@ public class Controller {
     }
 
     public void switchToGame(ActionEvent event){
-        MineSweeper.initMinefield("./medialab/SCENARIO2.txt");//change path
+
+        MineSweeper.initMinefield(scenario_path);
         int grid_size = MineSweeper.minefield.getSettings()[1];
+        int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
 
+        stage = (Stage)(flowpane).getScene().getWindow();
+        stage.setHeight((grid_size+3)*50);
+        stage.setWidth((grid_size+1)*50);
+
+        timer_label.setPadding(new Insets(0,(grid_size*50)/3,0,(grid_size*50)/3));
+
         CountDown timer = new CountDown(time, this);
+        if(timer.mythread != null){
+            timer.mythread.interrupt();
+        }
         timer.mythread = new Thread(timer,"Timer");
         timer.mythread.setDaemon(true);
 
         grid_buttons = new Button[grid_size][grid_size];
-        timer_label = new Label(Integer.toString(time));
-
-        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 35));
-
-        BorderPane border = new BorderPane();
-        GridPane grid = new GridPane();
+        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 25));
+        timer_label.setText(Integer.toString(time));
+        mine_label.setText(Integer.toString(mine_count));
+        flag_label.setText("0");
+        myvbox.getChildren().remove(grid);
+        grid = new GridPane();
 
         for (int r = 0; r < grid_size; r++) {
             for (int c = 0; c < grid_size; c++) {
@@ -217,27 +251,13 @@ public class Controller {
                 ImageView img = getImage("graphics/Covered_Tile.png");
                 button.setGraphic(img);
                 button.setPadding(Insets.EMPTY);
+
                 button.setOnMouseClicked(this::myclickhandler);
                 grid.add(button, c, r);
                 grid_buttons[r][c] = button;
             }
         }
-        ScrollPane scrollPane = new ScrollPane(grid);
-
-        border.setCenter(scrollPane);
-        Button MainMenu_Button = new Button("Main Menu");
-        Button show_minefield_button = new Button("Show Minefield");
-
-        MainMenu_Button.setOnAction(this::switchToMainMenu);
-        show_minefield_button.setOnAction(actionEvent -> MineSweeper.minefield.showMinefield());
-
-        FlowPane top_buttons = new FlowPane();
-        top_buttons.getChildren().addAll(MainMenu_Button , show_minefield_button, timer_label) ;
-        border.setTop(top_buttons);
-        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(border));
-        stage.show();
-
+        myvbox.getChildren().add(grid);
         timer.mythread.start();
     }
 

@@ -14,10 +14,15 @@ public class MineSweeper extends Application {
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainMenu.fxml"));
+        Parent root = loader.load();
+        Controller myController = (Controller)loader.getController();
         primaryStage.setTitle("MediaLab Minesweeper");
         primaryStage.setScene(new Scene(root)); // Place the scene in the stage
+        primaryStage.setResizable(true);
         primaryStage.show(); // Display the stage
+
+        myController.switchToGame(null);
     }
     public static void main(String[] args){
 //        minefield.showMinefield();
