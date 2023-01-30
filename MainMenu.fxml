@@ -10,16 +10,16 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="myvbox" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<VBox fx:id="myvbox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
       <MenuBar>
         <menus>
           <Menu mnemonicParsing="false" text="Application">
             <items>
-              <MenuItem mnemonicParsing="false" text="Create" />
+              <MenuItem mnemonicParsing="false" onAction="#create_button_popup" text="Create" />
                   <MenuItem mnemonicParsing="false" text="Load" />
                   <MenuItem mnemonicParsing="false" onAction="#switchToGame" text="Start" />
-                  <MenuItem mnemonicParsing="false" text="Exit" />
+                  <MenuItem mnemonicParsing="false" onAction="#exit_button" text="Exit" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Details">
@@ -30,7 +30,7 @@
           </Menu>
         </menus>
       </MenuBar>
-      <FlowPane fx:id="flowpane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="1002.0">
+      <FlowPane fx:id="flowpane" prefHeight="30.0" prefWidth="401.0">
          <children>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -40,10 +40,10 @@
                   <Insets left="10.0" />
                </FlowPane.margin>
             </ImageView>
-            <Label fx:id="mine_label" text="Label" />
-            <Label fx:id="timer_label" text="Label">
+            <Label fx:id="mine_label" text="-" />
+            <Label fx:id="timer_label" text="Press Start">
                <padding>
-                  <Insets left="320.0" />
+                  <Insets left="130.0" right="130.0" />
                </padding>
             </Label>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
@@ -54,7 +54,7 @@
                   <Insets />
                </FlowPane.margin>
             </ImageView>
-            <Label fx:id="flag_label" text="Label" />
+            <Label fx:id="flag_label" text="-" />
          </children>
       </FlowPane>
    </children>

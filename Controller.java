@@ -1,37 +1,37 @@
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
-
 import javafx.event.ActionEvent;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.concurrent.Flow;
-import java.util.stream.Stream;
+
 
 public class Controller {
     private Stage stage;
     private Scene scene;
-    private Parent root;
     public Button[][] grid_buttons;
-
     public String scenario_path = "./medialab/SCENARIO1.txt";
+
     @FXML
     public FlowPane flowpane;
     @FXML
@@ -43,9 +43,20 @@ public class Controller {
     @FXML
     public Label flag_label;
     @FXML
-    public ImageView flag_image_top;
-    @FXML
     public VBox myvbox;
+
+
+
+    @FXML
+    public TextField scenario_id_textfield;
+    @FXML
+    public TextField difficulty_textfield;
+    @FXML
+    public TextField numofmines_textfield;
+    @FXML
+    public TextField time_limit_textfield;
+    @FXML
+    public CheckBox supermine_checkbox;
 
     private int tries=0;
 
@@ -164,7 +175,6 @@ public class Controller {
         else{
             text = "You Lose :(";
         }
-//        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 25));
         timer_label.setText(text);
         setAndDisableAllButtons();
     }
@@ -215,24 +225,23 @@ public class Controller {
     }
 
     public void switchToGame(ActionEvent event){
-
         MineSweeper.initMinefield(scenario_path);
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
 
-        stage = (Stage)(flowpane).getScene().getWindow();
+        stage = (Stage)(myvbox).getScene().getWindow();
         stage.setHeight((grid_size+3)*50);
         stage.setWidth((grid_size+1)*50);
 
         timer_label.setPadding(new Insets(0,(grid_size*50)/3,0,(grid_size*50)/3));
 
         CountDown timer = new CountDown(time, this);
-        if(timer.mythread != null){
+        if(CountDown.mythread != null){
             timer.mythread.interrupt();
         }
-        timer.mythread = new Thread(timer,"Timer");
-        timer.mythread.setDaemon(true);
+        CountDown.mythread = new Thread(timer,"Timer");
+        CountDown.mythread.setDaemon(true);
 
         grid_buttons = new Button[grid_size][grid_size];
         timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 25));
@@ -258,19 +267,63 @@ public class Controller {
             }
         }
         myvbox.getChildren().add(grid);
-        timer.mythread.start();
+        CountDown.mythread.start();
     }
 
-    public void switchToMainMenu(ActionEvent event){
+    public void create_button_popup(ActionEvent event){//MouseEvent
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
-            stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-            scene = new Scene(root);
-            stage.setScene((scene));
-            stage.show();
+            Parent root = FXMLLoader.load(getClass().getResource("Create.fxml"));
+            Stage create_popup = new Stage();
+            create_popup.initModality(Modality.APPLICATION_MODAL);
+            create_popup.setTitle("cREATE");
+            Scene scene1= new Scene(root);
+            create_popup.setScene(scene1);
+            create_popup.showAndWait();
         }
         catch(IOException e){
             e.printStackTrace();
         }
     }
+
+    public void create_scenario(ActionEvent event){
+        BufferedWriter bwr = null;
+        String scenario_id,difficulty,numofmines,time_limit;
+        scenario_id = scenario_id_textfield.getText();
+        difficulty =  difficulty_textfield.getText();
+        numofmines = numofmines_textfield.getText();
+        time_limit = time_limit_textfield.getText();
+        boolean supermine = supermine_checkbox.isSelected();
+
+        try {
+            bwr = new BufferedWriter(new FileWriter("./medialab/"+scenario_id+ ".txt"));
+            bwr.write(difficulty+"\n"+numofmines+"\n"+time_limit+"\n"+ (supermine?1:0));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try
+                {if (bwr != null) {bwr.close();}
+                }
+            catch (IOException e) {
+            }
+        }
+        ((Stage)(difficulty_textfield).getScene().getWindow()).close();
+    }
+
+    public void exit_button(ActionEvent event){//MouseEvent
+        Platform.exit();
+    }
+
+//    public void switchToMainMenu(ActionEvent event){
+//        try{
+//            Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
+//            stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+//            scene = new Scene(root);
+//            stage.setScene((scene));
+//            stage.show();
+//        }
+//        catch(IOException e){
+//            e.printStackTrace();
+//        }
+//    }
 }
