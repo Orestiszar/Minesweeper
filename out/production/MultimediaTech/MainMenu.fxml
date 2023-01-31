@@ -17,7 +17,7 @@
           <Menu mnemonicParsing="false" text="Application">
             <items>
               <MenuItem mnemonicParsing="false" onAction="#create_button_popup" text="Create" />
-                  <MenuItem mnemonicParsing="false" text="Load" />
+                  <MenuItem mnemonicParsing="false" onAction="#load_button_popup" text="Load" />
                   <MenuItem mnemonicParsing="false" onAction="#switchToGame" text="Start" />
                   <MenuItem mnemonicParsing="false" onAction="#exit_button" text="Exit" />
             </items>
