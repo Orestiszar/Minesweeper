@@ -347,7 +347,7 @@ public class Controller {
             ((Stage)(load_scenario_textfield).getScene().getWindow()).close();
         }
         catch (FileNotFoundException e){
-            load_scenario_label.setText("Scenario not found, please try again.");
+            load_scenario_label.setText("Scenario not found");
         }
         catch(InvalidDescriptionException e){
             load_scenario_label.setText("Invalid Scenario");
