@@ -20,10 +20,10 @@ import javafx.stage.Popup;
 import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
+import myExceptions.InvalidDescriptionException;
+import myExceptions.InvalidValueException;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 
 public class Controller {
@@ -57,6 +57,13 @@ public class Controller {
     public TextField time_limit_textfield;
     @FXML
     public CheckBox supermine_checkbox;
+
+    @FXML
+    public TextField load_scenario_textfield;
+    @FXML
+    public Label load_scenario_label;
+    @FXML
+    public Button load_button;
 
     private int tries=0;
 
@@ -225,7 +232,15 @@ public class Controller {
     }
 
     public void switchToGame(ActionEvent event){
-        MineSweeper.initMinefield(scenario_path);
+        if(MineSweeper.minefield!=null){
+            MineSweeper.minefield.setMinefield();
+        }
+        else{
+            timer_label.setText("Load a Scenario first!");
+            return;
+        }
+
+
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
@@ -275,7 +290,7 @@ public class Controller {
             Parent root = FXMLLoader.load(getClass().getResource("Create.fxml"));
             Stage create_popup = new Stage();
             create_popup.initModality(Modality.APPLICATION_MODAL);
-            create_popup.setTitle("cREATE");
+            create_popup.setTitle("Create");
             Scene scene1= new Scene(root);
             create_popup.setScene(scene1);
             create_popup.showAndWait();
@@ -309,6 +324,40 @@ public class Controller {
         }
         ((Stage)(difficulty_textfield).getScene().getWindow()).close();
     }
+
+    public void load_button_popup(ActionEvent event){//MouseEvent
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("Load.fxml"));
+            Stage create_popup = new Stage();
+            create_popup.initModality(Modality.APPLICATION_MODAL);
+            create_popup.setTitle("Load");
+            Scene scene1= new Scene(root);
+            create_popup.setScene(scene1);
+            create_popup.showAndWait();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void load_scenario(ActionEvent event){
+        String mypath = load_scenario_textfield.getText();
+        try{
+            MineSweeper.minefield = new Minefield("./medialab/"+ mypath+".txt");
+            ((Stage)(load_scenario_textfield).getScene().getWindow()).close();
+        }
+        catch (FileNotFoundException e){
+            load_scenario_label.setText("Scenario not found, please try again.");
+        }
+        catch(InvalidDescriptionException e){
+            load_scenario_label.setText("Invalid Scenario");
+        }
+        catch (InvalidValueException e){
+            load_scenario_label.setText("Invalid values");
+        }
+
+    }
+
 
     public void exit_button(ActionEvent event){//MouseEvent
         Platform.exit();

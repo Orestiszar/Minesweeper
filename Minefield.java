@@ -49,7 +49,7 @@ public class Minefield {
         return result;
     }
 
-    private int[] ReadSettings(String path) throws InvalidDescriptionException {//return data from setting file in an int array
+    public int[] ReadSettings(String path) throws InvalidDescriptionException, FileNotFoundException {//return data from setting file in an int array
         BufferedReader br = null;
         String line;
         int data[] = new int[4];
@@ -63,10 +63,12 @@ public class Minefield {
                 data[i] = parseInt(line);
                 i++;
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found");
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (FileNotFoundException e){
+            throw new FileNotFoundException();
+        }
+        catch (IOException e) {
+            System.out.println("IO Exception");
         }
         finally {
             try {if (br != null) {br.close();}
@@ -76,7 +78,7 @@ public class Minefield {
             }
         }
         if(i<4){
-            throw new InvalidDescriptionException("Description file invalid");
+            throw new InvalidDescriptionException("Invalid Scenario");
         }
         return data;
     }
@@ -186,18 +188,11 @@ public class Minefield {
         return true;
     }
 
-    public Minefield(String path){
-        try{
-            int[] settings;
-            settings = ReadSettings(path); //throws InvalidDescriptionException
-            setParameters(settings); //throws InvalidValueException
-        }
-        catch (InvalidDescriptionException e){
-            e.printStackTrace();
-        }
-        catch(InvalidValueException e){
-            e.printStackTrace();
-        }
+    public Minefield(String path) throws InvalidDescriptionException, InvalidValueException, FileNotFoundException{
+
+        int[] settings;
+        settings = ReadSettings(path); //throws InvalidDescriptionException
+        setParameters(settings); //throws InvalidValueException
 
         minefield = new Tile[grid_size][grid_size];
         for(int i=0;i<grid_size;i++){

@@ -7,10 +7,10 @@ import javafx.stage.Stage;
 public class MineSweeper extends Application {
     public static Minefield minefield;
 
-    public static void initMinefield(String path){
-        minefield = new Minefield(path);
-        minefield.setMinefield();
-    }
+//    public static void initMinefield(String path){
+//        minefield = new Minefield(path);
+//        minefield.setMinefield();
+//    }
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) throws Exception{
