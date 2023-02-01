@@ -1,4 +1,7 @@
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -6,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -24,6 +28,8 @@ import myExceptions.InvalidDescriptionException;
 import myExceptions.InvalidValueException;
 
 import java.io.*;
+
+import static java.lang.Integer.parseInt;
 
 
 public class Controller {
@@ -64,6 +70,18 @@ public class Controller {
     public Label load_scenario_label;
     @FXML
     public Button load_button;
+
+    @FXML
+    public TableView<Myrow> tableView;
+
+    @FXML
+    public TableColumn<Myrow, Integer> mines_column;
+    @FXML
+    public TableColumn<Myrow, Integer> tries_column;
+    @FXML
+    public TableColumn<Myrow, Integer> time_column;
+    @FXML
+    public TableColumn<Myrow, String> winner_column;
 
     private int tries=0;
 
@@ -240,7 +258,7 @@ public class Controller {
             return;
         }
 
-
+        tries = 0;
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
@@ -328,12 +346,12 @@ public class Controller {
     public void load_button_popup(ActionEvent event){//MouseEvent
         try{
             Parent root = FXMLLoader.load(getClass().getResource("Load.fxml"));
-            Stage create_popup = new Stage();
-            create_popup.initModality(Modality.APPLICATION_MODAL);
-            create_popup.setTitle("Load");
+            Stage load_popup = new Stage();
+            load_popup.initModality(Modality.APPLICATION_MODAL);
+            load_popup.setTitle("Load");
             Scene scene1= new Scene(root);
-            create_popup.setScene(scene1);
-            create_popup.showAndWait();
+            load_popup.setScene(scene1);
+            load_popup.showAndWait();
         }
         catch(IOException e){
             e.printStackTrace();
@@ -355,24 +373,60 @@ public class Controller {
         catch (InvalidValueException e){
             load_scenario_label.setText("Invalid values");
         }
-
     }
-
 
     public void exit_button(ActionEvent event){//MouseEvent
         Platform.exit();
     }
 
-//    public void switchToMainMenu(ActionEvent event){
-//        try{
-//            Parent root = FXMLLoader.load(getClass().getResource("MainMenu.fxml"));
-//            stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-//            scene = new Scene(root);
-//            stage.setScene((scene));
-//            stage.show();
-//        }
-//        catch(IOException e){
-//            e.printStackTrace();
-//        }
-//    }
+    public void rounds_button_popup(ActionEvent event){//MouseEvent
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("Rounds.fxml"));
+            Stage rounds_popup = new Stage();
+            rounds_popup.initModality(Modality.APPLICATION_MODAL);
+            rounds_popup.setTitle("Details");
+            Scene scene1= new Scene(root);
+            rounds_popup.setScene(scene1);
+            rounds_popup.showAndWait();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void showPastGamesButton(ActionEvent event){//MouseEvent
+        //set the columns
+        mines_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("total_mines"));
+        tries_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("tries"));
+        time_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("time"));
+        winner_column.setCellValueFactory(new PropertyValueFactory<Myrow,String>("winner"));
+        tableView.setItems(getPastGames());
+    }
+
+
+    public ObservableList<Myrow> getPastGames(){
+        ObservableList<Myrow> result = FXCollections.observableArrayList();
+        String line = null;
+        try{
+            BufferedReader br = new BufferedReader(new FileReader("pastGames.txt"));
+            while((line = br.readLine()) != null) { //read next line until eof
+                if(line.length() == 0) //Skip empty lines
+                    continue;
+                String[] numbers = line.split(",");
+                int[] ints = new int[3];
+                for(int i = 0; i < 3; i++) ints[i] = Integer.parseInt(numbers[i]);
+                Myrow row = new Myrow(ints[0],ints[1],ints[2],numbers[3]);
+                result.add(row);
+            }
+        }
+        catch (IOException e){
+            result=null;
+        }
+        finally {
+            return result;
+        }
+    }
+
+
+
 }
