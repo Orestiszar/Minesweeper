@@ -381,28 +381,30 @@ public class Controller {
 
     public void rounds_button_popup(ActionEvent event){//MouseEvent
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("Rounds.fxml"));
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Rounds.fxml"));
+            Parent root = loader.load();
+            Controller myController = (Controller)loader.getController();
             Stage rounds_popup = new Stage();
             rounds_popup.initModality(Modality.APPLICATION_MODAL);
             rounds_popup.setTitle("Details");
             Scene scene1= new Scene(root);
             rounds_popup.setScene(scene1);
+
+            //set the columns
+            myController.mines_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("total_mines"));
+            myController.tries_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("tries"));
+            myController.time_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("time"));
+            myController.winner_column.setCellValueFactory(new PropertyValueFactory<Myrow,String>("winner"));
+            myController.tableView.setItems(getPastGames());
+
             rounds_popup.showAndWait();
+
         }
         catch(IOException e){
             e.printStackTrace();
         }
     }
-
-    public void showPastGamesButton(ActionEvent event){//MouseEvent
-        //set the columns
-        mines_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("total_mines"));
-        tries_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("tries"));
-        time_column.setCellValueFactory(new PropertyValueFactory<Myrow,Integer>("time"));
-        winner_column.setCellValueFactory(new PropertyValueFactory<Myrow,String>("winner"));
-        tableView.setItems(getPastGames());
-    }
-
 
     public ObservableList<Myrow> getPastGames(){
         ObservableList<Myrow> result = FXCollections.observableArrayList();
