@@ -122,6 +122,13 @@ public class Minefield {
     }
 
     public void setMinefield(){
+
+        for(int i=0;i<grid_size;i++){
+            for(int j=0;j<grid_size;j++){
+                minefield[i][j].mine=0;
+            }
+        }
+
         int x,y;
         int[] minex = new int[mine_count];//collect the mines to decide a supermine
         int[] miney = new int[mine_count];
@@ -177,6 +184,18 @@ public class Minefield {
             }
             System.out.println();
         }
+    }
+
+    public int getFlaggedMines(){
+        int result = 0;
+        for(int i=0;i<grid_size;i++){
+            for(int j=0;j<grid_size;j++){
+                if(minefield[i][j].flagged){
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 
     public boolean gameWon(){

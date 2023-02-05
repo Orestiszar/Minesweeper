@@ -1,11 +1,9 @@
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,8 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
-import javafx.stage.Popup;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import myExceptions.InvalidDescriptionException;
@@ -29,14 +25,11 @@ import myExceptions.InvalidValueException;
 
 import java.io.*;
 
-import static java.lang.Integer.parseInt;
 
 
 public class Controller {
     private Stage stage;
-    private Scene scene;
     public Button[][] grid_buttons;
-    public String scenario_path = "./medialab/SCENARIO1.txt";
 
     @FXML
     public FlowPane flowpane;
@@ -124,6 +117,7 @@ public class Controller {
             int mines = MineSweeper.minefield.getNumOfMines(row,col);
             setCorrectImage(row,col);
             MineSweeper.minefield.setTileOpened(row,col);
+            MineSweeper.minefield.setTileFlag(row,col,false);
             if(mines>0) return;
             int grid_size = MineSweeper.minefield.getSettings()[1];
             for(int i=-1;i<2;i++){
@@ -143,16 +137,24 @@ public class Controller {
     }
 
     private void performFlag(final int row, final int col){
+
+        if(MineSweeper.minefield.getTile(row,col).opened) return;
+
         int flagged_mines=0,grid_size,mine_count;
         grid_size = MineSweeper.minefield.getSettings()[1];
         mine_count = MineSweeper.minefield.getSettings()[2];
-        for(int k=0;k<grid_size;k++){
-            for(int m=0;m<grid_size;m++){
-                if(MineSweeper.minefield.getTile(k,m).flagged){
-                    flagged_mines+=1;
-                }
-            }
+        flagged_mines = MineSweeper.minefield.getFlaggedMines();
+
+        if(MineSweeper.minefield.getTile(row,col).flagged){
+            ImageView img = getImage("graphics/Covered_Tile.png");
+            MineSweeper.minefield.setTileFlag(row,row,false);
+            grid_buttons[row][col].setGraphic(img);
+            grid_buttons[row][col].setPadding(Insets.EMPTY);
+            flag_label.setText(Integer.toString(flagged_mines-1));
+            MineSweeper.minefield.setTileFlag(row,col,false);
+            return;
         }
+
         if(mine_count>flagged_mines){//num of mines = settings[2]
             if(MineSweeper.minefield.getTile(row,col).supermine==1 && tries<4){
                 //reveal row&col
@@ -189,19 +191,22 @@ public class Controller {
 
     public void gameOver(boolean won){
         //stop the thread
-
+        if(CountDown.mythread == null) return;
         if(CountDown.mythread.isAlive()){
             CountDown.mythread.interrupt();
+            String text;
+            if(won){
+                text = "You Win :)";
+            }
+            else{
+                text = "You Lose :(";
+            }
+            double s_width = stage.getWidth();
+            double l_width = timer_label.getWidth();
+            timer_label.setPadding(new Insets(0,(s_width-l_width),0,(s_width-l_width)));
+            timer_label.setText(text);
+            setAndDisableAllButtons();
         }
-        String text;
-        if(won){
-            text = "You Win :)";
-        }
-        else{
-            text = "You Lose :(";
-        }
-        timer_label.setText(text);
-        setAndDisableAllButtons();
     }
 
     private void myclickhandler(MouseEvent event){
@@ -217,16 +222,16 @@ public class Controller {
         String mycol = id.substring(i+1);
         int brow = Integer.parseInt(myrow);
         int bcol = Integer.parseInt(mycol);
+
         if(pressedButton==MouseButton.PRIMARY){
 //            System.out.println(id);
             tries++;
-
             if(MineSweeper.minefield.getTile(brow,bcol).mine==0){
                 //call recursive check
                 revealEmptyCells(brow,bcol);
+                flag_label.setText(Integer.toString(MineSweeper.minefield.getFlaggedMines()));
                 if(MineSweeper.minefield.gameWon()){
                     gameOver(true);
-
                 }
             }
             else{
@@ -234,44 +239,28 @@ public class Controller {
             }
         }
         else if(pressedButton==MouseButton.SECONDARY){
-            ImageView img;
-            if(MineSweeper.minefield.getTile(brow,bcol).flagged){
-                img = getImage("graphics/Covered_Tile.png");
-                MineSweeper.minefield.setTileFlag(brow,bcol,false);
-                button.setGraphic(img);
-                button.setPadding(Insets.EMPTY);
-                int temp_flag_count = Integer.parseInt(flag_label.getText());
-                flag_label.setText(Integer.toString(temp_flag_count-1));
-            }
-            else{
-                performFlag(brow,bcol);
-            }
+            performFlag(brow,bcol);
         }
     }
 
-    public void switchToGame(ActionEvent event){
+    public void switchToGame(){
+        stage = (Stage)(myvbox).getScene().getWindow();
         if(MineSweeper.minefield!=null){
             MineSweeper.minefield.setMinefield();
         }
         else{
+            timer_label.setPadding(new Insets(0,110,0,100));
             timer_label.setText("Load a Scenario first!");
             return;
         }
-
         tries = 0;
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
 
-        stage = (Stage)(myvbox).getScene().getWindow();
-        stage.setHeight((grid_size+3)*50);
-        stage.setWidth((grid_size+1)*50);
-
-        timer_label.setPadding(new Insets(0,(grid_size*50)/3,0,(grid_size*50)/3));
-
         CountDown timer = new CountDown(time, this);
         if(CountDown.mythread != null){
-            timer.mythread.interrupt();
+            CountDown.mythread.interrupt();
         }
         CountDown.mythread = new Thread(timer,"Timer");
         CountDown.mythread.setDaemon(true);
@@ -300,10 +289,13 @@ public class Controller {
             }
         }
         myvbox.getChildren().add(grid);
+        stage.sizeToScene();
+        double s_width = stage.getWidth();
+        timer_label.setPadding(new Insets(0,(s_width/3),0,s_width/3));
         CountDown.mythread.start();
     }
 
-    public void create_button_popup(ActionEvent event){//MouseEvent
+    public void create_button_popup(){
         try{
             Parent root = FXMLLoader.load(getClass().getResource("Create.fxml"));
             Stage create_popup = new Stage();
@@ -318,7 +310,7 @@ public class Controller {
         }
     }
 
-    public void create_scenario(ActionEvent event){
+    public void create_scenario(){
         BufferedWriter bwr = null;
         String scenario_id,difficulty,numofmines,time_limit;
         scenario_id = scenario_id_textfield.getText();
@@ -343,7 +335,7 @@ public class Controller {
         ((Stage)(difficulty_textfield).getScene().getWindow()).close();
     }
 
-    public void load_button_popup(ActionEvent event){//MouseEvent
+    public void load_button_popup(){
         try{
             Parent root = FXMLLoader.load(getClass().getResource("Load.fxml"));
             Stage load_popup = new Stage();
@@ -358,7 +350,7 @@ public class Controller {
         }
     }
 
-    public void load_scenario(ActionEvent event){
+    public void load_scenario(){
         String mypath = load_scenario_textfield.getText();
         try{
             MineSweeper.minefield = new Minefield("./medialab/"+ mypath+".txt");
@@ -375,11 +367,11 @@ public class Controller {
         }
     }
 
-    public void exit_button(ActionEvent event){//MouseEvent
+    public void exit_button(){
         Platform.exit();
     }
 
-    public void rounds_button_popup(ActionEvent event){//MouseEvent
+    public void rounds_button_popup(){
         try{
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Rounds.fxml"));
@@ -424,9 +416,11 @@ public class Controller {
         catch (IOException e){
             result=null;
         }
-        finally {
-            return result;
-        }
+        return result;
+    }
+
+    public void solution_button(){
+        gameOver(false);
     }
 
 
