@@ -81,7 +81,7 @@ public class Controller {
     private ImageView getImage(String path){
         Image imageOk = new Image(getClass().getResourceAsStream(path));
         ImageView img = new ImageView(imageOk);
-        img.setFitHeight(50);
+        img.setFitHeight(20);
         img.setPreserveRatio(true);
         return img;
     }
@@ -277,7 +277,7 @@ public class Controller {
             for (int c = 0; c < grid_size; c++) {
                 Button button = new Button();
                 button.setId(r + " " +c);
-                button.setPrefSize(50,50);
+                button.setPrefSize(20,20);
 
                 ImageView img = getImage("graphics/Covered_Tile.png");
                 button.setGraphic(img);

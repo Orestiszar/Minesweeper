@@ -126,6 +126,9 @@ public class Minefield {
         for(int i=0;i<grid_size;i++){
             for(int j=0;j<grid_size;j++){
                 minefield[i][j].mine=0;
+                minefield[i][j].supermine=0;
+                minefield[i][j].opened=false;
+                minefield[i][j].flagged=false;
             }
         }
 
