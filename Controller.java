@@ -15,14 +15,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.event.ActionEvent;
 import myExceptions.InvalidDescriptionException;
 import myExceptions.InvalidValueException;
-
 import java.io.*;
 
 
@@ -30,6 +26,8 @@ import java.io.*;
 public class Controller {
     private Stage stage;
     public Button[][] grid_buttons;
+
+    public int button_size;
 
     @FXML
     public FlowPane flowpane;
@@ -81,7 +79,7 @@ public class Controller {
     private ImageView getImage(String path){
         Image imageOk = new Image(getClass().getResourceAsStream(path));
         ImageView img = new ImageView(imageOk);
-        img.setFitHeight(20);
+        img.setFitHeight(button_size);
         img.setPreserveRatio(true);
         return img;
     }
@@ -201,11 +199,10 @@ public class Controller {
             else{
                 text = "You Lose :(";
             }
-            double s_width = stage.getWidth();
-            double l_width = timer_label.getWidth();
-            timer_label.setPadding(new Insets(0,(s_width-l_width),0,(s_width-l_width)));
+            timer_label.setPadding(new Insets(0,180,0,180));
             timer_label.setText(text);
             setAndDisableAllButtons();
+
         }
     }
 
@@ -247,9 +244,10 @@ public class Controller {
         stage = (Stage)(myvbox).getScene().getWindow();
         if(MineSweeper.minefield!=null){
             MineSweeper.minefield.setMinefield();
+            timer_label.setPadding(new Insets(0,210,0,210));
         }
         else{
-            timer_label.setPadding(new Insets(0,110,0,100));
+            timer_label.setPadding(new Insets(0,150,0,150));
             timer_label.setText("Load a Scenario first!");
             return;
         }
@@ -257,6 +255,8 @@ public class Controller {
         int grid_size = MineSweeper.minefield.getSettings()[1];
         int mine_count = MineSweeper.minefield.getSettings()[2];
         int time = MineSweeper.minefield.getSettings()[3];
+
+        button_size = 600/grid_size;
 
         CountDown timer = new CountDown(time, this);
         if(CountDown.mythread != null){
@@ -266,7 +266,6 @@ public class Controller {
         CountDown.mythread.setDaemon(true);
 
         grid_buttons = new Button[grid_size][grid_size];
-        timer_label.setFont(Font.font("Arial", FontWeight.BOLD, 25));
         timer_label.setText(Integer.toString(time));
         mine_label.setText(Integer.toString(mine_count));
         flag_label.setText("0");
@@ -277,7 +276,7 @@ public class Controller {
             for (int c = 0; c < grid_size; c++) {
                 Button button = new Button();
                 button.setId(r + " " +c);
-                button.setPrefSize(20,20);
+                button.setPrefSize(button_size,button_size);
 
                 ImageView img = getImage("graphics/Covered_Tile.png");
                 button.setGraphic(img);
@@ -290,14 +289,12 @@ public class Controller {
         }
         myvbox.getChildren().add(grid);
         stage.sizeToScene();
-        double s_width = stage.getWidth();
-        timer_label.setPadding(new Insets(0,(s_width/3),0,s_width/3));
         CountDown.mythread.start();
     }
 
     public void create_button_popup(){
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("Create.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("stages/Create.fxml"));
             Stage create_popup = new Stage();
             create_popup.initModality(Modality.APPLICATION_MODAL);
             create_popup.setTitle("Create");
@@ -337,7 +334,7 @@ public class Controller {
 
     public void load_button_popup(){
         try{
-            Parent root = FXMLLoader.load(getClass().getResource("Load.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("stages/Load.fxml"));
             Stage load_popup = new Stage();
             load_popup.initModality(Modality.APPLICATION_MODAL);
             load_popup.setTitle("Load");
@@ -374,7 +371,7 @@ public class Controller {
     public void rounds_button_popup(){
         try{
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Rounds.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("stages/Rounds.fxml"));
             Parent root = loader.load();
             Controller myController = (Controller)loader.getController();
             Stage rounds_popup = new Stage();

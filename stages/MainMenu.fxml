@@ -9,8 +9,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox fx:id="myvbox" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<VBox fx:id="myvbox" prefHeight="700.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
    <children>
       <MenuBar>
         <menus>
@@ -34,27 +35,39 @@
          <children>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@graphics/Mine.png" />
+                  <Image url="@../graphics/Mine.png" />
                </image>
                <FlowPane.margin>
                   <Insets left="10.0" />
                </FlowPane.margin>
             </ImageView>
-            <Label fx:id="mine_label" text="-" />
+            <Label fx:id="mine_label" text="-">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font></Label>
             <Label fx:id="timer_label" text="Press Start">
+               <FlowPane.margin>
+                  <Insets />
+               </FlowPane.margin>
+               <font>
+                  <Font name="System Bold" size="22.0" />
+               </font>
                <padding>
-                  <Insets left="130.0" right="130.0" />
+                  <Insets left="210.0" right="210.0" />
                </padding>
             </Label>
             <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@graphics/Flag.png" />
+                  <Image url="@../graphics/Flag.png" />
                </image>
                <FlowPane.margin>
                   <Insets />
                </FlowPane.margin>
             </ImageView>
-            <Label fx:id="flag_label" text="-" />
+            <Label fx:id="flag_label" text="-">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font></Label>
          </children>
       </FlowPane>
    </children>

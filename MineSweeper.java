@@ -9,7 +9,7 @@ public class MineSweeper extends Application {
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainMenu.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("stages/MainMenu.fxml"));
         Parent root = loader.load();
         primaryStage.setTitle("MediaLab Minesweeper");
         primaryStage.setScene(new Scene(root)); // Place the scene in the stage
@@ -17,12 +17,6 @@ public class MineSweeper extends Application {
         primaryStage.show(); // Display the stage
     }
     public static void main(String[] args){
-//        minefield.showMinefield();
-//        CountDown temp = new CountDown(minefield.getSettings()[3]);
-//        CountDown temp = new CountDown(5);
-//        Thread mytemp = temp.t;
-//        mytemp.join();
-//        System.out.println("End");
         launch(args);
     }
 }
