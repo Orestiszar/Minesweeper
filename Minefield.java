@@ -160,6 +160,10 @@ public class Minefield {
     private void saveMinefield(){
         BufferedWriter bwr = null;
         try {
+
+            File myObj = new File("./mines.txt");
+            myObj.createNewFile();
+
             bwr = new BufferedWriter(new FileWriter("./mines.txt"));
             for(int i=0;i<grid_size;i++){
                 for(int j=0;j<grid_size;j++){

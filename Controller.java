@@ -202,9 +202,63 @@ public class Controller {
             timer_label.setPadding(new Insets(0,180,0,180));
             timer_label.setText(text);
             setAndDisableAllButtons();
-
+            //save to past games
+            saveGameParams(won);
         }
     }
+
+    public void saveGameParams(boolean won){
+        BufferedWriter bwr = null;
+        try {
+
+            File myObj = new File("pastGames.txt");
+            int i = 0;
+            String [] line = new String[5];
+
+            if (!myObj.createNewFile()) {
+                //get past games
+                BufferedReader br = new BufferedReader(new FileReader("pastGames.txt"));
+                while((line[i] = br.readLine()) != null) { //read next line until eof
+                    if(line[i].length() == 0) //Skip empty lines
+                        continue;
+                    i++;
+                    if(i==4){//past 4 games + this game
+                        break;
+                    }
+                }
+                br.close();
+            }
+
+            //rewrite them with new game on top
+            bwr = new BufferedWriter(new FileWriter("pastGames.txt"));
+            int past_mine_count, past_time;
+            past_mine_count = MineSweeper.minefield.getSettings()[2];
+            past_time = MineSweeper.minefield.getSettings()[3];
+            String pastWinner;
+            if(won){
+                pastWinner = "Player";
+            }
+            else{
+                pastWinner = "CPU";
+            }
+            bwr.write(past_mine_count + "," + tries + "," + past_time + "," + pastWinner + "\n");
+
+            for(int j=0; j<i;j++){
+                bwr.write(line[j] + "\n");
+            }
+            bwr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {if (bwr != null) {bwr.close();}
+            }
+            catch (IOException e) {
+            }
+        }
+    }
+
 
     private void myclickhandler(MouseEvent event){
         Button button = (Button)event.getSource();
@@ -376,7 +430,7 @@ public class Controller {
             Controller myController = (Controller)loader.getController();
             Stage rounds_popup = new Stage();
             rounds_popup.initModality(Modality.APPLICATION_MODAL);
-            rounds_popup.setTitle("Details");
+            rounds_popup.setTitle("PastGames");
             Scene scene1= new Scene(root);
             rounds_popup.setScene(scene1);
 
