@@ -13,11 +13,9 @@ public class CountDown implements Runnable{
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-//                            Controller.timer_label.setText("You Lose :(");
                             controller.gameOver(false);
                         }
                     });
-//                    System.out.println("Thread Stopped Running...");
                     return;
                 }
                 mythread.sleep(1000);
@@ -32,7 +30,6 @@ public class CountDown implements Runnable{
             }
         }
         catch (InterruptedException e){
-//            System.out.println("Thread Stopped Running...");
         }
 
     }

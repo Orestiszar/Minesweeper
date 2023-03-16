@@ -19,6 +19,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import myExceptions.InvalidDescriptionException;
 import myExceptions.InvalidValueException;
+
+import javax.sql.rowset.spi.SyncResolver;
 import java.io.*;
 
 
@@ -188,23 +190,29 @@ public class Controller {
     }
 
     public void gameOver(boolean won){
-        //stop the thread
         if(CountDown.mythread == null) return;
+
+        if(!CountDown.mythread.isAlive() && !timer_label.getText().equals("0")){
+           return;
+        }
+
         if(CountDown.mythread.isAlive()){
             CountDown.mythread.interrupt();
-            String text;
-            if(won){
-                text = "You Win :)";
-            }
-            else{
-                text = "You Lose :(";
-            }
-            timer_label.setPadding(new Insets(0,180,0,180));
-            timer_label.setText(text);
-            setAndDisableAllButtons();
-            //save to past games
-            saveGameParams(won);
         }
+
+        String text;
+        if(won){
+            text = "You Win :)";
+        }
+        else{
+            text = "You Lose :(";
+        }
+        timer_label.setPadding(new Insets(0,180,0,180));
+        timer_label.setText(text);
+        setAndDisableAllButtons();
+        //save to past games
+        saveGameParams(won);
+
     }
 
     public void saveGameParams(boolean won){
